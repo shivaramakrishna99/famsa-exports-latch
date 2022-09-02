@@ -1,4 +1,6 @@
-
+'''
+Generate and export guide trees, and readable formats of alignments using FAMSA
+'''
 import subprocess
 from pathlib import Path
 
