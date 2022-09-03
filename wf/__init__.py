@@ -1,5 +1,5 @@
 '''
-Generate and export guide trees, and readable formats of alignments using FAMSA
+Export guide trees in the Newick format and distance matrices as CSV using FAMSA
 '''
 import subprocess
 from pathlib import Path
@@ -16,11 +16,15 @@ class GuideTree(Enum):
     upgma = 'UPGMA' # UPGMA
     nj = 'Neighbor Joining Tree' # Neighbor Joining Tree
 
+class DistExport(Enum):
+    dt = 'Distance' # Distance
+    pid = 'Pairwise Identity' # Pairwise Identity
+
 @large_task
-def famsa_alignment(
+def famsa_export_task(
     input: LatchFile,
     output: str = 'famsa-alignment',
-    guideTree: Union[GuideTree,LatchFile] = GuideTree.sl,
+    guideTree: Union[LatchFile,DistExport] = GuideTree.sl,
     medoidTree: Optional[int] = 0,
     gzip: bool = False,
     ) -> LatchFile:
@@ -67,7 +71,7 @@ def famsa_alignment(
 """The metadata included here will be injected into your interface."""
 
 metadata = LatchMetadata(
-    display_name="FAMSA - MSA",
+    display_name="FAMSA - Guide Tree Generation and Exports",
     documentation="https://github.com/refresh-bio/FAMSA/blob/master/README.md",
     author=LatchAuthor(
         name="Shivaramakrishna Srinivasan",
@@ -99,19 +103,29 @@ metadata = LatchMetadata(
             display_name="Compress File",
             description="Enable gzipped output",
         ),
+        'a': LatchParameter(
+            display_name = 'a',
+            description= 'str',
+            choose= 
+                    {
+                        'Q':'A'
+                    }
+                
+        ),
     },
 )
 
 @workflow(metadata)
-def famsa(
+def famsa_export(
     input: LatchFile,
-    output: str = 'famsa-alignment',
-    guideTree: Union[GuideTree,LatchFile] = GuideTree.sl,
+    output: str = 'filename',
+    guideTree: Union[GuideTree,DistExport] = GuideTree.sl,
     medoidTree: Optional[int] = 0,
     gzip: bool = False,
+    a: str = "AUG",
     ) -> LatchFile:
     """A progressive algorithm for large-scale multiple sequence alignments
-# **FAMSA -** Multiple Sequence Alignment
+# **FAMSA -** Exports and Guide Tree Generations
 ---
 
 [GitHub Repository](https://github.com/shivaramakrishna99/famsa-latch) | [Paper](https://www.nature.com/articles/srep33964) | [Source Documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md)
@@ -183,7 +197,7 @@ Scientific Reports, 6, 33964](https://www.nature.com/articles/srep33964)
 **This workflow is authored by Shivaramakrishna Srinivasan.**
 **Feel free to reach out to me via [email](mailto:shivaramakrishna.srinivasan@gmail.com) regarding any suggestions/feedback to improve this workflow.**
     """
-    return famsa_alignment(
+    return famsa_export_task(
     input=input,
     output=output,
     guideTree=guideTree,
@@ -198,7 +212,7 @@ the parameter names as the keys. These default values will be available under
 the 'Test Data' dropdown at console.latch.bio.
 """
 LaunchPlan(
-    famsa,
+    famsa_export,
     "Refresh Bio's Data",
     {
         "input": LatchFile("s3://latch-public/test-data/3701/FAMSA/test/adeno_fiber/adeno_fiber"),
