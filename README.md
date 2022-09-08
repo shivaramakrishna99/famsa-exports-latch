@@ -1,7 +1,7 @@
 **FAMSA -** Guide Tree Export | [LatchBio](https://console.latch.bio/)
 ---
 
-[Workflow Page](https://console.latch.bio/explore/67306/info) | [Paper](https://www.nature.com/articles/srep33964) | [Source Documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md)
+[Workflow Page](https://console.latch.bio/workflows/67891/info) | [Paper](https://www.nature.com/articles/srep33964) | [Source Documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md)
 
 FAMSA (Fast and Accurate Multiple Sequence Alignment of huge protein families) is an algorithm for ultra-scale multiple sequence alignments (3M protein sequences in 5 minutes and 24 GB of RAM).
 

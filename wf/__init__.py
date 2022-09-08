@@ -93,6 +93,7 @@ def famsa_export(
 # **FAMSA -** Guide Tree Export
 ---
 
+
 [GitHub Repository](https://github.com/shivaramakrishna99/famsa-exports-latch) | [Paper](https://www.nature.com/articles/srep33964) | [Source Documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md)
 
 FAMSA (Fast and Accurate Multiple Sequence Alignment of huge protein families) is an algorithm for ultra-scale multiple sequence alignments (3M protein sequences in 5 minutes and 24 GB of RAM).
@@ -108,7 +109,7 @@ FAMSA (Fast and Accurate Multiple Sequence Alignment of huge protein families) i
     * Neighbour Joining Tree
 * `Output` - Provide a name for your guide tree file.
 
-You can import the generated guide tree in the [FAMSA Multiple Sequence Alignment workflow](https://console.latch.bio/workflows/67882/info) on Latch.
+>You can import the generated guide tree in the [FAMSA Multiple Sequence Alignment workflow](https://console.latch.bio/workflows/67882/info) on Latch.**
 
 ### **Test Data**
 Select `Use Test Data` `>` `Refresh Bio's Data` to make use of a sample input to generate a guide tree
