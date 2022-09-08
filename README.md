@@ -1,4 +1,4 @@
-**FAMSA -** Multiple Sequence Alignment | [LatchBio](https://console.latch.bio/)
+**FAMSA -** Guide Tree Export | [LatchBio](https://console.latch.bio/)
 ---
 
 [Workflow Page](https://console.latch.bio/explore/67306/info) | [Paper](https://www.nature.com/articles/srep33964) | [Source Documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md)
@@ -10,16 +10,16 @@ FAMSA (Fast and Accurate Multiple Sequence Alignment of huge protein families) i
 ### **Parameters**
 
 * `Input` - Upload an input FASTA file
-* `Guide Tree` - Choose an existing guide tree method or upload your own file in Newick (`.dnd`) format.  The available guide tree options are:
+* `Guide Tree` - Choose a guide tree method to generate your custom guide tree in the [Newick format](https://evolution.genetics.washington.edu/phylip/newicktree.html) (`.dnd`).  The available guide tree options are:
     * Single Linkage Tree (*default*)
     * UPGMA
     * Neighbour Joining Tree
-* `Medoid Tree` - Use MedoidTree heuristic for speeding up tree construction (*default: disabled*). If enabled, enter the threshold number of sequences (`n_seqs`) to use medoid trees only for sets with `n_seqs` or more
-* `Output` - Provide a name for the output.  By default, the output is saved as a `.aln` file
-* `Compress Output` - Enable gzipped output (default: disabled).  When enabled, compression level is set to `7`.  See the original documentation for this
+* `Output` - Provide a name for your guide tree file.
+
+You can import the generated guide tree in the [FAMSA Multiple Sequence Alignment workflow](https://console.latch.bio/workflows/67882/info) on Latch.
 
 ### **Test Data**
-Select `Use Test Data` `>` `Refresh Bio's Data` to make use of a sample input for alignment and a custom guide tree file
+Select `Use Test Data` `>` `Refresh Bio's Data` to make use of a sample input to generate a guide tree
 
 ### **Original Documentation**
 Check out the original [documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md) for FAMSA

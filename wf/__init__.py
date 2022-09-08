@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 from latch import large_task, small_task, workflow
-# from latch.resources.launch_plan import LaunchPlan
+from latch.resources.launch_plan import LaunchPlan
 from latch.types import LatchAuthor, LatchDir, LatchFile, LatchMetadata, LatchParameter
 from enum import Enum
 from typing import Union, Optional, List
@@ -17,23 +17,19 @@ class GuideTree(Enum):
     nj = 'Neighbor Joining Tree' # Neighbor Joining Tree
 
 class DistExport(Enum):
-    dt = 'Distance' # Distance
-    pid = 'Pairwise Identity' # Pairwise Identity
+    dt = 'Distance Matrix' # Distance
+    pid = 'Pairwise Identity Matrix' # Pairwise Identity
 
 @large_task
 def famsa_export_task(
     input: LatchFile,
-    output: str = 'famsa-alignment',
-    guideTree: Union[LatchFile,DistExport] = GuideTree.sl,
-    medoidTree: Optional[int] = 0,
-    gzip: bool = False,
+    gtOutput: str = 'custom_guide_tree',
+    gtExport: GuideTree = GuideTree.sl,
     ) -> LatchFile:
 
     input_path = Path(input).resolve()
-    output+='.aln'
-    
-    if gzip: output+='.gz'
-    output_path = Path(output).resolve()
+
+    gtOutput+='.dnd'
 
     gtOptions = {
         'Single Linkage Tree':'sl',
@@ -41,37 +37,28 @@ def famsa_export_task(
         'Neighbor Joining Tree':'nj'
         }
 
-    gtFile=''
-    if isinstance(guideTree, GuideTree):
-        gtValue = str(guideTree.value)
-        for gt in gtOptions.keys():
-            if gt == gtValue:
-                gtValue = gtOptions[gt]
-    else:
-        gtValue = 'import'
-        gtFile = Path(guideTree).resolve()
+    gtValue = str(gtExport.value)
+    for gt in gtOptions.keys():
+        if gt == gtValue:
+            gtValue = gtOptions[gt]
 
-    famsa_cmd = [
+    gt_export_cmd = [
         './FAMSA/famsa',
         '-gt',
         gtValue,
-        str(gtFile),
+        '-gt_export',
         str(input_path),
-        str(output_path)
+        str(gtOutput)
     ]
 
-    if isinstance(guideTree, GuideTree): famsa_cmd.pop(3)
-    if isinstance(medoidTree, int): famsa_cmd[1:1] = ['-medoidtree','-medoid_threshold',str(medoidTree)]
-    if gzip: famsa_cmd[1:1] = ['-gz','-gz-lev','7']
+    subprocess.run(gt_export_cmd)
 
-    subprocess.run(famsa_cmd)
-
-    return LatchFile(str(output_path), f"latch:///{output_path}")
+    return LatchFile(str(gtOutput), f"latch:///FAMSA-Exports/{gtOutput}")
 
 """The metadata included here will be injected into your interface."""
 
 metadata = LatchMetadata(
-    display_name="FAMSA - Guide Tree Generation and Exports",
+    display_name="FAMSA - Guide Tree Export",
     documentation="https://github.com/refresh-bio/FAMSA/blob/master/README.md",
     author=LatchAuthor(
         name="Shivaramakrishna Srinivasan",
@@ -83,52 +70,30 @@ metadata = LatchMetadata(
     parameters= {
         "input": LatchParameter(
             display_name="Input",
-            description="Enter text or FASTA",
+            description="Upload a FASTA file",
         ),
-        "guideTree": LatchParameter(
-            display_name="Guide Tree",
-            description="Choose between three guide trees",
+        "gtExport": LatchParameter(
+            display_name="Tree Algorithm Type",
+            description="Choose between three guide trees to export your file in the Newick format",
+            section_title="Guide Tree Export"
         ),
-        "medoidTree": LatchParameter(
-            display_name="Enable medoid trees for sets with minimum specified sequences",
-            description="",
-            section_title="Medoid Tree"
-        ),
-        "output": LatchParameter(
-            display_name="Filename",
-            description="Name output file",
-            section_title="Output"
-        ),
-        'gzip': LatchParameter(
-            display_name="Compress File",
-            description="Enable gzipped output",
-        ),
-        'a': LatchParameter(
-            display_name = 'a',
-            description= 'str',
-            choose= 
-                    {
-                        'Q':'A'
-                    }
-                
-        ),
+        "gtOutput": LatchParameter(
+            display_name="Guide Tree Output",
+        )
     },
 )
 
 @workflow(metadata)
 def famsa_export(
     input: LatchFile,
-    output: str = 'filename',
-    guideTree: Union[GuideTree,DistExport] = GuideTree.sl,
-    medoidTree: Optional[int] = 0,
-    gzip: bool = False,
-    a: str = "AUG",
+    gtOutput: str = 'custom_guide_tree',
+    gtExport: GuideTree = GuideTree.sl
     ) -> LatchFile:
-    """A progressive algorithm for large-scale multiple sequence alignments
-# **FAMSA -** Exports and Guide Tree Generations
+    """A progressive algorithm for large-scale multiple sequence alignments and guide tree generation
+# **FAMSA -** Guide Tree Export
 ---
 
-[GitHub Repository](https://github.com/shivaramakrishna99/famsa-latch) | [Paper](https://www.nature.com/articles/srep33964) | [Source Documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md)
+[GitHub Repository](https://github.com/shivaramakrishna99/famsa-exports-latch) | [Paper](https://www.nature.com/articles/srep33964) | [Source Documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md)
 
 FAMSA (Fast and Accurate Multiple Sequence Alignment of huge protein families) is an algorithm for ultra-scale multiple sequence alignments (3M protein sequences in 5 minutes and 24 GB of RAM).
 
@@ -137,16 +102,16 @@ FAMSA (Fast and Accurate Multiple Sequence Alignment of huge protein families) i
 ### **Parameters**
 
 * `Input` - Upload an input FASTA file
-* `Guide Tree` - Choose an existing guide tree method or upload your own file in Newick (`.dnd`) format.  The available guide tree options are:
+* `Guide Tree` - Choose a guide tree method to generate your custom guide tree in the [Newick format](https://evolution.genetics.washington.edu/phylip/newicktree.html) (`.dnd`).  The available guide tree options are:
     * Single Linkage Tree (*default*)
     * UPGMA
     * Neighbour Joining Tree
-* `Medoid Tree` - Use MedoidTree heuristic for speeding up tree construction (*default: disabled*). If enabled, enter the threshold number of sequences (`n_seqs`) to use medoid trees only for sets with `n_seqs` or more
-* `Output` - Provide a name for the output.  By default, the output is saved as a `.aln` file
-* `Compress Output` - Enable gzipped output (default: disabled).  When enabled, compression level is set to `7`.  See the original documentation for this
+* `Output` - Provide a name for your guide tree file.
+
+You can import the generated guide tree in the [FAMSA Multiple Sequence Alignment workflow](https://console.latch.bio/workflows/67882/info) on Latch.
 
 ### **Test Data**
-Select `Use Test Data` `>` `Refresh Bio's Data` to make use of a sample input for alignment and a custom guide tree file
+Select `Use Test Data` `>` `Refresh Bio's Data` to make use of a sample input to generate a guide tree
 
 ### **Original Documentation**
 Check out the original [documentation](https://github.com/refresh-bio/FAMSA/blob/master/README.md) for FAMSA
@@ -199,10 +164,8 @@ Scientific Reports, 6, 33964](https://www.nature.com/articles/srep33964)
     """
     return famsa_export_task(
     input=input,
-    output=output,
-    guideTree=guideTree,
-    medoidTree=medoidTree,
-    gzip=gzip
+    gtOutput=gtOutput,
+    gtExport=gtExport
 )
 
 
@@ -216,6 +179,5 @@ LaunchPlan(
     "Refresh Bio's Data",
     {
         "input": LatchFile("s3://latch-public/test-data/3701/FAMSA/test/adeno_fiber/adeno_fiber"),
-        "guideTree": LatchFile("s3://latch-public/test-data/3701/FAMSA/test/adeno_fiber/slink.dnd")
     },
 )
